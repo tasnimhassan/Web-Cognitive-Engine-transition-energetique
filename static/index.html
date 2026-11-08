@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WebCognitive Engine</title>
+<style>
+:root{--bg:#f4f8fa;--card:#fff;--ink:#0b2a3a;--muted:#5b7482;--teal:#1c7c8c;--amber:#f2a900;--line:#d5e2e7;--user:#12495f;--err:#b3261e}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1a22;--card:#12272f;--ink:#e8f1f4;--muted:#93aab5;--teal:#3fb0c2;--line:#244350;--user:#1c7c8c;--err:#ff8a80}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Calibri,system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100vh}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--line)}
+h1{font-size:18px;margin:0}h1 span{color:var(--teal)}
+.status{display:flex;gap:8px;flex-wrap:wrap;font-size:12px}
+.pill{padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.pill.ok{color:#2e7d32;border-color:#2e7d32}.pill.ko{color:var(--err);border-color:var(--err)}
+main{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;max-width:900px;width:100%;margin:0 auto}
+.welcome{text-align:center;color:var(--muted);margin-top:8vh}
+.welcome h2{color:var(--ink);margin-bottom:6px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:99px;cursor:pointer;font-size:14px}
+.chip:hover{border-color:var(--teal)}
+.msg{max-width:85%;padding:12px 16px;border-radius:14px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+.msg.user{align-self:flex-end;background:var(--user);color:#fff;border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px;max-width:100%;width:100%}
+.msg.err{color:var(--err)}
+.cite{display:inline-block;background:var(--amber);color:#0b2a3a;font-size:12px;font-weight:700;border-radius:6px;padding:0 5px;margin:0 1px}
+.sources{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;white-space:normal}
+.sources h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 8px}
+details.src{margin-bottom:6px;font-size:13px}
+details.src summary{cursor:pointer}
+.src .file{font-weight:600}.src .meta{color:var(--muted)}
+.src blockquote{margin:6px 0 0;padding:8px 12px;border-left:3px solid var(--teal);color:var(--muted);white-space:pre-wrap}
+.dots::after{content:"...";animation:b 1s infinite}@keyframes b{50%{opacity:.2}}
+footer{background:var(--card);border-top:1px solid var(--line);padding:12px 20px}
+form{display:flex;gap:8px;max-width:900px;margin:0 auto}
+input[type=text]{flex:1;padding:12px 14px;font-size:15px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+select,button{font-size:14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:0 10px}
+button.send{background:var(--teal);color:#fff;border:0;padding:0 20px;font-weight:600;cursor:pointer}
+button:disabled,input:disabled{opacity:.5;cursor:not-allowed}
+
+nav{display:flex;gap:6px}
+.tab{padding:7px 16px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;font-size:14px}
+.tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.dash{flex:1;overflow-y:auto;padding:20px;width:100%;max-width:1100px;margin:0 auto;display:none}
+.dash h2{margin:0 0 4px}.dash .sub{color:var(--muted);margin-bottom:16px;font-size:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi b{display:block;font-size:30px;color:var(--teal);font-family:Cambria,Georgia,serif}.kpi span{font-size:13px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.card h3{margin:0 0 4px;font-size:16px}.card .note{font-size:12px;color:var(--muted);margin-bottom:12px}
+.card.wide{grid-column:1/-1}
+.donut{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.donut svg{width:170px;height:170px;flex:none}
+.legend{font-size:13px;display:grid;gap:4px}.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px}
+.hbar{display:grid;grid-template-columns:minmax(90px,200px) 1fr auto;gap:8px;align-items:center;font-size:12px;margin-bottom:5px}
+.hbar .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hbar .track{background:var(--bg);border-radius:5px;height:14px}
+.hbar .fill{height:100%;border-radius:5px;background:var(--teal)}.hbar.click{cursor:pointer}.hbar.click:hover .lbl{color:var(--teal)}
+.hbar.sel .fill{background:var(--amber)}
+.hist{display:flex;align-items:flex-end;gap:4px;height:170px;padding-top:18px}
+.hist div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:11px;color:var(--muted)}
+.hist .col{width:100%;background:var(--teal);border-radius:4px 4px 0 0;min-height:1px}
+.detail{margin-top:10px;font-size:13px;border-top:1px solid var(--line);padding-top:8px}
+.scatter svg{width:100%;height:auto;background:var(--bg);border-radius:8px}
+.refresh{font-size:13px;padding:6px 12px;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <h1>Web<span>Cognitive</span> Engine <small style="color:var(--muted);font-weight:400">| transition énergétique</small></h1>
+  <nav><button class="tab active" id="tab-chat">Chat</button><button class="tab" id="tab-dash">Analyse du corpus</button></nav>
+  <div class="status"><span class="pill" id="st-db">base…</span><span class="pill" id="st-llm">Ollama…</span></div>
+</header>
+<main id="chat">
+  <div class="welcome" id="welcome">
+    <h2>Pose une question sur ton corpus</h2>
+    <div>Les réponses sont générées en local, uniquement à partir de tes documents.</div>
+    <div class="chips" id="chips"></div>
+  </div>
+</main>
+<section class="dash" id="dash">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+    <div><h2>Analyse du corpus</h2><div class="sub">Vue d'ensemble des documents et des passages indexés.</div></div>
+    <button class="refresh" id="refresh">Actualiser</button>
+  </div>
+  <div id="dash-body"><div class="sub">Calcul en cours…</div></div>
+</section>
+<footer>
+  <form id="form">
+    <input type="text" id="q" placeholder="Ex. Que prévoit la PPE3 pour l'éolien terrestre ?" autocomplete="off" required minlength="3">
+    <select id="k" title="Nombre de passages utilisés"><option value="3">3 passages</option><option value="5" selected>5 passages</option><option value="8">8 passages</option></select>
+    <button class="send" id="send" type="submit">Envoyer</button>
+  </form>
+</footer>
+<script>
+const EXAMPLES = ["Que prévoit la PPE3 pour l'éolien terrestre ?","Quelle est la consommation d'électricité en Nouvelle-Aquitaine en 2025 ?","Que reproche la Cour des comptes au soutien aux énergies renouvelables ?"];
+const chat = document.getElementById("chat"), form = document.getElementById("form"), qInput = document.getElementById("q"), sendBtn = document.getElementById("send");
+
+EXAMPLES.forEach(t => { const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = t;
+  b.onclick = () => { qInput.value = t; form.requestSubmit(); }; document.getElementById("chips").appendChild(b); });
+
+async function refreshStatus() {
+  const db = document.getElementById("st-db"), llm = document.getElementById("st-llm");
+  try { const s = await (await fetch("/stats")).json(); db.textContent = s.n_documents + " documents, " + s.n_chunks + " chunks"; db.className = "pill " + (s.n_chunks ? "ok" : "ko"); }
+  catch { db.textContent = "base indisponible"; db.className = "pill ko"; }
+  try { const s = await (await fetch("/llm/status")).json();
+    llm.textContent = !s.ollama ? "Ollama éteint" : s.model_available ? s.model : s.model + " non installé"; llm.className = "pill " + (s.ollama && s.model_available ? "ok" : "ko"); }
+  catch { llm.textContent = "Ollama ?"; llm.className = "pill ko"; }
+}
+
+function addMsg(cls, text) { const d = document.createElement("div"); d.className = "msg " + cls; if (text) d.textContent = text; chat.appendChild(d); chat.scrollTop = chat.scrollHeight; return d; }
+
+function renderAnswer(el, text) {            // transforme [1] en pastille, sans innerHTML
+  el.textContent = "";
+  text.split(/(\[\d+\])/).forEach(part => {
+    if (/^\[\d+\]$/.test(part)) { const s = document.createElement("span"); s.className = "cite"; s.textContent = part; el.appendChild(s); }
+    else el.appendChild(document.createTextNode(part)); });
+}
+
+function renderSources(container, sources) {
+  if (!sources.length) return;
+  const box = document.createElement("div"); box.className = "sources";
+  const h = document.createElement("h3"); h.textContent = "Sources"; box.appendChild(h);
+  sources.forEach(s => {
+    const d = document.createElement("details"); d.className = "src";
+    const sum = document.createElement("summary");
+    const n = document.createElement("span"); n.className = "cite"; n.textContent = "[" + s.n + "]";
+    const f = document.createElement("span"); f.className = "file"; f.textContent = " " + s.source_file;
+    const m = document.createElement("span"); m.className = "meta"; m.textContent = " — page " + s.page + " — pertinence " + Math.round(s.score * 100) + " %";
+    sum.append(n, f, m); d.appendChild(sum);
+    const q = document.createElement("blockquote"); q.textContent = s.text; d.appendChild(q); box.appendChild(d); });
+  container.appendChild(box);
+}
+
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  const question = qInput.value.trim(); if (question.length < 3) return;
+  document.getElementById("welcome")?.remove();
+  addMsg("user", question); qInput.value = ""; qInput.disabled = sendBtn.disabled = true;
+  const bot = addMsg("bot"); const body = document.createElement("div"); body.className = "dots"; bot.appendChild(body);
+  let text = "", sources = [];
+  try {
+    const resp = await fetch("/chat/stream", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, k: parseInt(document.getElementById("k").value) }) });
+    if (!resp.ok) throw new Error("Erreur serveur (" + resp.status + ")");
+    const reader = resp.body.getReader(), dec = new TextDecoder(); let buf = "";
+    while (true) {
+      const { value, done } = await reader.read(); if (done) break;
+      buf += dec.decode(value, { stream: true }); let i;
+      while ((i = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (!line) continue;
+        const ev = JSON.parse(line);
+        if (ev.type === "sources") sources = ev.sources;
+        else if (ev.type === "token") { text += ev.text; body.className = ""; body.textContent = text; chat.scrollTop = chat.scrollHeight; }
+        else if (ev.type === "error") throw new Error(ev.message);
+      }
+    }
+    renderAnswer(body, text); renderSources(bot, sources);
+  } catch (err) { body.className = "err"; body.textContent = (text ? text + "\n\n" : "") + "⚠ " + err.message; bot.classList.add("err"); }
+  qInput.disabled = sendBtn.disabled = false; qInput.focus(); chat.scrollTop = chat.scrollHeight; refreshStatus();
+});
+refreshStatus();
+
+// ======== Etape 7 : tableau de bord ========
+const PALETTE = ["#1c7c8c","#f2a900","#e4572e","#5fad56","#3b6e8f","#9b5de5","#00a6d6","#f15bb5","#8d6e63","#2a9d8f","#7a9ba8"];
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+const fmt = n => new Intl.NumberFormat("fr-FR").format(n);
+
+function card(title, note, wide) { const c = el("div", "card" + (wide ? " wide" : "")); c.append(el("h3", "", title)); if (note) c.append(el("div", "note", note)); return c; }
+
+function donut(items) {
+  const total = items.reduce((a, b) => a + b.value, 0), R = 0.8, C = 2 * Math.PI * R;
+  const wrap = el("div", "donut"), svg = document.createElementNS(NS, "svg"); svg.setAttribute("viewBox", "-1 -1 2 2");
+  let acc = 0;
+  items.forEach((it, i) => {
+    const c = document.createElementNS(NS, "circle"), f = it.value / total;
+    c.setAttribute("r", R); c.setAttribute("cx", 0); c.setAttribute("cy", 0); c.setAttribute("fill", "none");
+    c.setAttribute("stroke", PALETTE[i % PALETTE.length]); c.setAttribute("stroke-width", 0.32);
+    c.setAttribute("stroke-dasharray", (f * C) + " " + C); c.setAttribute("stroke-dashoffset", -acc * C);
+    c.setAttribute("transform", "rotate(-90)"); const t = document.createElementNS(NS, "title"); t.textContent = it.label + " : " + it.value; c.append(t);
+    svg.append(c); acc += f; });
+  const tx = document.createElementNS(NS, "text"); tx.setAttribute("text-anchor", "middle"); tx.setAttribute("y", 0.12); tx.setAttribute("font-size", 0.4);
+  tx.setAttribute("fill", "currentColor"); tx.textContent = total; svg.append(tx);
+  const lg = el("div", "legend");
+  items.forEach((it, i) => { const r = el("div"); const sw = el("i"); sw.style.background = PALETTE[i % PALETTE.length];
+    r.append(sw, document.createTextNode(it.label + " : " + it.value + " (" + Math.round(100 * it.value / total) + " %)")); lg.append(r); });
+  wrap.append(svg, lg); return wrap;
+}
+
+function hbar(items, opts = {}) {
+  const max = Math.max(...items.map(i => i.value), 1), box = el("div");
+  items.forEach(it => {
+    const r = el("div", "hbar" + (opts.onClick ? " click" : "")), l = el("span", "lbl", it.label); l.title = it.label;
+    const tr = el("div", "track"), f = el("div", "fill"); f.style.width = (100 * it.value / max) + "%"; tr.append(f);
+    r.append(l, tr, el("span", "", fmt(it.value)));
+    if (opts.onClick) r.onclick = () => { box.querySelectorAll(".hbar").forEach(x => x.classList.remove("sel")); r.classList.add("sel"); opts.onClick(it); };
+    box.append(r); });
+  return box;
+}
+
+function histogram(bins) {
+  const max = Math.max(...bins.map(b => b.value), 1), h = el("div", "hist");
+  bins.forEach(b => { const c = el("div"); c.append(el("span", "", b.value)); const col = el("div", "col"); col.style.height = (100 * b.value / max * 0.78) + "%";
+    col.title = b.label + " caractères : " + b.value + " passages"; c.append(col); const l = el("span", "", b.label.replace("-", "–")); l.style.fontSize = "10px"; c.append(l); h.append(c); });
+  return h;
+}
+
+function scatter(pca) {
+  const fams = [...new Set(pca.points.map(p => p.family))], W = 600, H = 380, pad = 14;
+  const box = el("div", "scatter"), svg = document.createElementNS(NS, "svg"); svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  pca.points.forEach(p => { const c = document.createElementNS(NS, "circle");
+    c.setAttribute("cx", pad + p.x * (W - 2 * pad)); c.setAttribute("cy", pad + (1 - p.y) * (H - 2 * pad)); c.setAttribute("r", 3);
+    c.setAttribute("fill", PALETTE[fams.indexOf(p.family) % PALETTE.length]); c.setAttribute("fill-opacity", 0.65);
+    const t = document.createElementNS(NS, "title"); t.textContent = p.file + " (page " + p.page + ")"; c.append(t); svg.append(c); });
+  const lg = el("div", "legend"); lg.style.cssText = "display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px";
+  fams.forEach(f => { const r = el("div"), sw = el("i"); sw.style.background = PALETTE[fams.indexOf(f) % PALETTE.length]; r.append(sw, document.createTextNode(f)); lg.append(r); });
+  box.append(svg, lg); return box;
+}
+
+function renderDash(d) {
+  const body = document.getElementById("dash-body"); body.textContent = "";
+  const k = el("div", "kpis");
+  [[d.totals.documents, "documents"], [d.totals.chunks, "passages indexés"], [fmt(d.totals.chars), "caractères de texte"], [d.totals.avg_chunk, "caractères par passage (moyenne)"]]
+    .forEach(([v, l]) => { const x = el("div", "kpi"); x.append(el("b", "", v), el("span", "", l)); k.append(x); });
+  body.append(k);
+  const g = el("div", "grid");
+  let c = card("Documents par format", "Répartition des fichiers du corpus."); c.append(donut(d.formats)); g.append(c);
+  c = card("Documents par famille de source", "Qui a produit les documents ?"); c.append(donut(d.families)); g.append(c);
+  c = card("Mots-clés de la transition énergétique", "Nombre d'occurrences dans tout le corpus. Clique sur une barre pour voir les documents concernés.", true);
+  const det = el("div", "detail", "Choisis un mot-clé pour voir les documents où il apparaît le plus.");
+  c.append(hbar(d.keywords, { onClick: it => { const kw = d.keywords.find(x => x.label === it.label); det.textContent = "";
+    det.append(el("b", "", "« " + kw.label + " » : présent dans " + kw.docs + " documents. Les plus riches :"));
+    kw.top.forEach(t => det.append(el("div", "", "• " + t.file + " (" + t.count + ")"))); } }), det); g.append(c);
+  c = card("Volume de texte par document", "Les 12 plus longs documents (en caractères)."); c.append(hbar(d.volume)); g.append(c);
+  c = card("Taille des passages", "Nombre de passages selon leur longueur en caractères."); c.append(histogram(d.chunk_hist)); g.append(c);
+  if (d.pca) { c = card("Carte des passages (ACP en 2 dimensions)",
+      "Chaque point est un passage ; deux points proches ont un sens proche. Couleur = famille de source. Survole un point pour voir le fichier. Variance expliquée : " + Math.round(100 * (d.pca.variance[0] + d.pca.variance[1])) + " %.", true);
+    c.append(scatter(d.pca)); g.append(c); }
+  body.append(g);
+}
+
+let dashLoaded = false;
+async function loadDash(refresh) {
+  const body = document.getElementById("dash-body"); body.textContent = "Calcul en cours…";
+  try { const r = await fetch("/analytics" + (refresh ? "?refresh=true" : "")); if (!r.ok) throw new Error("Erreur serveur (" + r.status + ")"); renderDash(await r.json()); dashLoaded = true; }
+  catch (e) { body.textContent = "⚠ " + e.message + " — as-tu lancé POST /index ?"; }
+}
+function showView(v) {
+  const dash = v === "dash";
+  document.getElementById("chat").style.display = dash ? "none" : "";
+  document.querySelector("footer").style.display = dash ? "none" : "";
+  document.getElementById("dash").style.display = dash ? "block" : "none";
+  document.getElementById("tab-chat").classList.toggle("active", !dash);
+  document.getElementById("tab-dash").classList.toggle("active", dash);
+  if (dash && !dashLoaded) loadDash(false);
+}
+document.getElementById("tab-chat").onclick = () => showView("chat");
+document.getElementById("tab-dash").onclick = () => showView("dash");
+document.getElementById("refresh").onclick = () => loadDash(true);
+</script>
+</body>
+</html>
